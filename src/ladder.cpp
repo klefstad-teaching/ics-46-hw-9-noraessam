@@ -13,42 +13,35 @@ using namespace std;
 
 void error(string word1, string word2, string msg) {
     cerr << "Error: " << msg << " (" << word1 << ", " << word2 << ")" << endl;
+    exit(1);
 }
 
 
 bool is_adjacent(const string& word1, const string& word2) {
-    if (word1 == word2)
-        return false;
+    if (word1 == word2) return true;
 
-    int len1 = word1.size(), len2 = word2.size();
-    if (abs(len1 - len2) > 1)
-        return false;
+    int len1 = word1.length(), len2 = word2.length();
+    if (abs(len1 - len2) > 1) return false;
 
-    int diff = 0;
-    int i = 0, j = 0;
-
+    int diff = 0, i = 0, j = 0;
     while (i < len1 && j < len2) {
         if (word1[i] != word2[j]) {
-            diff++;
-            if (diff > 1)
-                return false;
-            if (len1 > len2)
-                i++;
+            if (++diff > 1) return false;
+            if (len1 > len2) 
+                ++i;
             else if (len2 > len1)
-                j++;
+                ++j;
             else {
-                i++; 
-                j++;
+                ++i; 
+                ++j;
             }
         } else {
-            i++;
-            j++;
+            ++i; 
+            ++j;
         }
     }
-
-    if (i < len1 || j < len2)
-        diff++;
-
+    if (i < len1 || j < len2) ++diff;
+    
     return diff == 1;
 }
 
@@ -87,11 +80,11 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     return vector<string>();
 }
 
-
 void load_words(set<string>& word_list, const string& file_name) {
     ifstream infile(file_name);
     if (!infile) {
         cerr << "Error: unable to open file " << file_name << endl;
+        exit(1);
     }
     
     string word;
@@ -115,6 +108,36 @@ void print_word_ladder(const vector<string>& ladder) {
     }
     cout << endl;
 }
+
+bool edit_distance_within(const std::string& str1, const std::string& str2, int d) {
+    int m = str1.size(), n = str2.size();
+    
+    if (abs(m - n) > d)
+        return false;
+    
+    std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1, 0));
+    
+    for (int i = 0; i <= m; i++) {
+        dp[i][0] = i;
+    }
+    for (int j = 0; j <= n; j++) {
+        dp[0][j] = j;
+    }
+    
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            int cost = (str1[i - 1] == str2[j - 1]) ? 0 : 1;
+            dp[i][j] = std::min({ dp[i - 1][j] + 1,
+                                  dp[i][j - 1] + 1,
+                                  dp[i - 1][j - 1] + cost });
+        }
+        if (*std::min_element(dp[i].begin(), dp[i].end()) > d)
+            return false;
+    }
+    
+    return dp[m][n] <= d;
+}
+
 
 #define my_assert(e) { cout << #e << ((e) ? " passed" : " failed") << endl; }
 
