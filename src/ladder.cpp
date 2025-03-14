@@ -39,13 +39,11 @@ bool edit_distance_within(const string& str1, const string& str2, int d) {
 bool is_adjacent(const string& word1, const string& word2) {
     if (word1 == word2) return true;
     int len1 = word1.length(), len2 = word2.length();
-    if (abs(len1 - len2) > 1)
-        return false;
+    if (abs(len1 - len2) > 1) return false;
     int diff = 0, i = 0, j = 0;
     while (i < len1 && j < len2) {
         if (word1[i] != word2[j]) {
-            if (++diff > 1)
-                return false;
+            if (++diff > 1) return false;
             if (len1 > len2)
                 ++i;
             else if (len2 > len1)
@@ -55,12 +53,11 @@ bool is_adjacent(const string& word1, const string& word2) {
             ++i; ++j;
         }
     }
-    if (i < len1 || j < len2)
-        ++diff;
+    if (i < len1 || j < len2) ++diff;
     return diff == 1;
 }
 
-vector<string> get_neighbors(const string &word, const set<string>& dict) {
+vector<string> get_neighbors(const string &word, set<string>& dict) {
     vector<string> neighbors;
     for (int i = 0; i < word.size(); i++) {
         char orig = word[i];
@@ -86,6 +83,8 @@ vector<string> get_neighbors(const string &word, const set<string>& dict) {
                 neighbors.push_back(candidate);
         }
     }
+    sort(neighbors.begin(), neighbors.end());
+    neighbors.erase(unique(neighbors.begin(), neighbors.end()), neighbors.end());
     return neighbors;
 }
 
@@ -103,18 +102,24 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     ladder_queue.push({begin_word});
     dict.erase(begin_word);
     while (!ladder_queue.empty()) {
-        vector<string> current = ladder_queue.front();
-        ladder_queue.pop();
-        string last_word = current.back();
-        vector<string> neighbors = get_neighbors(last_word, dict);
-        for (string candidate : neighbors) {
-            dict.erase(candidate);
-            vector<string> new_ladder = current;
-            new_ladder.push_back(candidate);
-            if (candidate == end_word)
-                return new_ladder;
-            ladder_queue.push(new_ladder);
+        int levelSize = ladder_queue.size();
+        set<string> used_this_level;
+        for (int i = 0; i < levelSize; i++) {
+            vector<string> current = ladder_queue.front();
+            ladder_queue.pop();
+            string last_word = current.back();
+            vector<string> neighbors = get_neighbors(last_word, dict);
+            for (string candidate : neighbors) {
+                used_this_level.insert(candidate);
+                vector<string> new_ladder = current;
+                new_ladder.push_back(candidate);
+                if (candidate == end_word)
+                    return new_ladder;
+                ladder_queue.push(new_ladder);
+            }
         }
+        for (string w : used_this_level)
+            dict.erase(w);
     }
     return vector<string>();
 }
@@ -127,6 +132,7 @@ void load_words(set<string>& word_list, const string& file_name) {
     }
     string token;
     while (infile >> token) {
+        transform(token.begin(), token.end(), token.begin(), ::tolower);
         word_list.insert(token);
     }
     infile.close();
