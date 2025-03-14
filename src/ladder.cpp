@@ -9,12 +9,13 @@
 #include <algorithm>
 #include <cmath>
 #include <unordered_set>
+#include <unordered_map>
 
 using namespace std;
 
 void error(string word1, string word2, string msg) {
     cout << "Error: " << msg << " (" << word1 << ", " << word2 << ")" << endl;
-    exit(1);
+    // exit(1);
 }
 
 bool edit_distance_within(const string& str1, const string& str2, int d) {
@@ -38,11 +39,13 @@ bool edit_distance_within(const string& str1, const string& str2, int d) {
 bool is_adjacent(const string& word1, const string& word2) {
     if (word1 == word2) return true;
     int len1 = word1.length(), len2 = word2.length();
-    if (abs(len1 - len2) > 1) return false;
+    if (abs(len1 - len2) > 1)
+        return false;
     int diff = 0, i = 0, j = 0;
     while (i < len1 && j < len2) {
         if (word1[i] != word2[j]) {
-            if (++diff > 1) return false;
+            if (++diff > 1)
+                return false;
             if (len1 > len2)
                 ++i;
             else if (len2 > len1)
@@ -83,7 +86,7 @@ vector<string> get_neighbors(const string &word, const unordered_set<string>& di
             temp.insert(i, 1, c);
             if (dict.count(temp))
                 neighbors.push_back(temp);
-            temp.erase(i,1);
+            temp.erase(i, 1);
         }
     }
     sort(neighbors.begin(), neighbors.end());
