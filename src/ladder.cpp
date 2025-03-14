@@ -53,11 +53,12 @@ bool is_adjacent(const string& word1, const string& word2) {
             ++i; ++j;
         }
     }
-    if (i < len1 || j < len2) ++diff;
+    if (i < len1 || j < len2)
+        ++diff;
     return diff == 1;
 }
 
-vector<string> get_neighbors(const string &word, set<string>& dict) {
+vector<string> get_neighbors(const string &word, const set<string>& dict) {
     vector<string> neighbors;
     for (int i = 0; i < word.size(); i++) {
         char orig = word[i];
